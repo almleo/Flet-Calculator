@@ -67,9 +67,8 @@ class Calculator(ft.Container):
         data = event.control.data
         if data == 'AC':
             self.visor.value = '0'
-            self.number1 = 0
-            self.number2 = 0
-            self.repeat = False
+            self.reset()
+
         elif data in ('0','1','2','3','4','5','6','7','8','9','.'):
             if self.visor.value == "0" or self.new_number:
                 self.visor.value = data 
@@ -77,33 +76,32 @@ class Calculator(ft.Container):
             else:
                 self.visor.value = self.visor.value + data 
         elif data in ("+", "-", "*", "/"):
+            
+            self.visor.value = self.do_calc(self.number1, float(self.visor.value), self.operation)
+            print(self.number1)
+            
+            print(self.visor.value)
+            print("---------------")
+
             self.operation = data
-            if self.number1 != 0 and self.repeat == False:
-                self.number1 = self.do_calc(self.number1, float(self.visor.value), self.operation)
-                self.visor.value = self.number1
-            else:
-                self.number1 = float(self.visor.value)
+
+            self.number1 = float(self.visor.value)
             self.new_number = True
-            self.repeat = False
+
         elif data in ("%"):
             if self.number1 == 0:
                 self.visor.value = "0"
             else:
                 self.visor.value = self.number_format(self.number1 * (float(self.visor.value)/100))
-
+        elif data in ("+/-"):
+            pass
 
         elif data in ("="):
-            if self.repeat == True:
-                self.number1 = float(self.visor.value)
-                result = self.do_calc(self.number1, self.number2, self.operation)
-                self.visor.value = result
-
-            else:
-                self.number2 = float(self.visor.value)
-                result = self.do_calc(self.number1, self.number2, self.operation)
-                self.visor.value = result
-                self.new_number = True
-                self.repeat = True
+            result = self.do_calc(self.number1, float(self.visor.value), self.operation)
+            self.visor.value = result
+            self.number1 = result
+            
+            self.reset()
                 
 
         self.update()
@@ -126,10 +124,10 @@ class Calculator(ft.Container):
 
     def reset(self):
         self.number1 = 0
-        self.number2 = 0
+        
         self.new_number = True
-        self.repeat = False
-        self.operation = ''
+        # self.repeat = False
+        self.operation = '+'
 
 def main(page:ft.Page):
     page.Title="Calculator"
