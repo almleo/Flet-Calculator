@@ -27,6 +27,7 @@ class ExtraActionButton(CalcButton):
         CalcButton.__init__(self, text,  button_clicked, expand)
         self.bgcolor = ft.colors.BLUE_GREY_100
         self.color = ft.colors.BLACK
+        
 
 class Calculator(ft.Container):
     def __init__(self):
@@ -63,9 +64,12 @@ class Calculator(ft.Container):
         self.padding = 20
         self.content = ft.Column( controls = [self.linha_0, self.linha_1, self.linha_2, self.linha_3, self.linha_4, self.linha_5])
 
-    def button_clicked(self, event):
-        data = event.control.data
-        if data == 'AC':
+    def button_clicked(self, event, key_event=False):
+        if key_event == True:
+            data = event
+        else:
+            data = event.control.data
+        if data == 'AC' or self.visor.value == 'Error':
             self.visor.value = '0'
             self.reset()
 
@@ -75,14 +79,10 @@ class Calculator(ft.Container):
                 self.new_number = False
             else:
                 self.visor.value = self.visor.value + data 
+                
         elif data in ("+", "-", "*", "/"):
             
             self.visor.value = self.do_calc(self.number1, float(self.visor.value), self.operation)
-            print(self.number1)
-            
-            print(self.visor.value)
-            print("---------------")
-
             self.operation = data
 
             self.number1 = float(self.visor.value)
@@ -94,7 +94,10 @@ class Calculator(ft.Container):
             else:
                 self.visor.value = self.number_format(self.number1 * (float(self.visor.value)/100))
         elif data in ("+/-"):
-            pass
+            if float(self.visor.value) > 0:
+                self.visor.value = "-" + str(self.visor.value)
+            elif float(self.visor.value) < 0:
+                self.visor.value = self.number_format(abs(float(self.visor.value)))
 
         elif data in ("="):
             result = self.do_calc(self.number1, float(self.visor.value), self.operation)
@@ -120,19 +123,50 @@ class Calculator(ft.Container):
         elif op == "*":
             return self.number_format(n1 * n2)
         elif op == "/":
-            return self.number_format(n1 / n2)
+            if n2 == 0:
+                return "Error"
+            else:
+                return self.number_format(n1 / n2)
 
     def reset(self):
         self.number1 = 0
-        
         self.new_number = True
-        # self.repeat = False
         self.operation = '+'
-
+    
+    def on_keyboard(self, event: ft.KeyboardEvent):
+        # numbers
+        if event.key in ('Â', 'Numpad Decimal'):
+            self.button_clicked('.', key_event=True)
+        elif(event.key in ('0','1','2','3','4','5','6','7','8','9','.','Numpad 0','Numpad 1', 'Numpad 2', 'Numpad 3', 'Numpad 4', 'Numpad 5', 'Numpad 6', 'Numpad 7', 'Numpad 8', 'Numpad 9') and event.shift==False):
+            self.button_clicked(event.key[-1:], key_event=True)
+        # add
+        elif(event.key == 'Numpad Add' or (event.key == '=' and event.shift==True)):
+            self.button_clicked('+', key_event=True)
+        # subtract
+        elif(event.key == 'Numpad Subtract' or event.key == '-'):
+            self.button_clicked('-', key_event=True)
+        # multiply
+        elif(event.key == 'Numpad Multiply' or (event.key == '8' and event.shift==True)):
+            self.button_clicked('*', key_event=True)
+        # divide
+        elif(event.key == 'Numpad Divide' or event.key == 'Á'):
+            self.button_clicked('/', key_event=True)
+        # Percent
+        elif(event.key == '5' and event.shift == True):
+            self.button_clicked('%', key_event=True)
+        # equals
+        elif(event.key == 'Enter'):
+            self.button_clicked('=', key_event=True)
+        # clear
+        elif(event.key == 'Escape'):
+            self.button_clicked('AC', key_event=True)
+            
 def main(page:ft.Page):
     page.Title="Calculator"
     
+    
     calculator = Calculator()
+    page.on_keyboard_event = calculator.on_keyboard
     page.add(calculator)
     
 
