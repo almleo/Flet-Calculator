@@ -163,6 +163,8 @@ class Calculator(ft.Container):
             
 def main(page:ft.Page):
     page.Title="Calculator"
+    page.window.width = 400
+    page.window.height = 360
     
     
     calculator = Calculator()
