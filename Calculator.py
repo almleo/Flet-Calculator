@@ -165,7 +165,9 @@ def main(page:ft.Page):
     page.Title="Calculator"
     page.window.width = 400
     page.window.height = 360
-    
+    page.horizontal_alignment=ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment=ft.MainAxisAlignment.CENTER
+
     
     calculator = Calculator()
     page.on_keyboard_event = calculator.on_keyboard
